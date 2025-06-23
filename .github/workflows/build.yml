@@ -1,21 +1,27 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-java-with-maven
-
 name: Java CI with Maven
 
 on:
   push:
     branches: [ main ]
-    
   workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
         java: [ '17' ]
+    
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: user
+          POSTGRES_DB: petclinic
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -26,4 +32,7 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven Wrapper
-        run: ./mvnw -B verify
+        run: ./mvnw -B verify -Dspring.docker.compose.skip.in-tests=true
+      - name: Display test logs
+        if: failure()
+        run: cat target/surefire-reports/*.txt

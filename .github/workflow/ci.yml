@@ -3,8 +3,6 @@ name: Build and Test
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
@@ -14,7 +12,7 @@ jobs:
       postgres:
         image: postgres:14
         env:
-          POSTGRES_DB: petclini
+          POSTGRES_DB: petclinic
           POSTGRES_USER: petclinic
           POSTGRES_PASSWORD: petclinic
         ports:

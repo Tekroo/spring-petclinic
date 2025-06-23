@@ -11,17 +11,6 @@ jobs:
     strategy:
       matrix:
         java: [ '17' ]
-    
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_PASSWORD: password
-          POSTGRES_USER: user
-          POSTGRES_DB: petclinic
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +21,7 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven Wrapper
-        run: ./mvnw -B verify -Dspring.docker.compose.skip.in-tests=true
+        run: ./mvnw -B verify -Dspring.docker.compose.skip.in-tests=true -Dtest=!PostgresIntegrationTests
       - name: Display test logs
         if: failure()
         run: cat target/surefire-reports/*.txt

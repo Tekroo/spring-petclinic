@@ -14,7 +14,7 @@ jobs:
       postgres:
         image: postgres:14
         env:
-          POSTGRES_DB: petclini
+          POSTGRES_DB: petclinic
           POSTGRES_USER: petclinic
           POSTGRES_PASSWORD: petclinic
         ports:

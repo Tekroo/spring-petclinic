@@ -3,9 +3,8 @@ name: Build and Test
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch: 
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,6 +43,14 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean package -DskipTests
-        
-      - name: Run tests
-        run: mvn test
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U petclinic && break
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+
+      - name: Run tests with PostgreSQL profile
+        run: mvn test -Dspring.profiles.active=postgres

@@ -9,21 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_DB: petclinic
-          POSTGRES_USER: petclinic
-          POSTGRES_PASSWORD: petclinic
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
       - uses: actions/checkout@v3
 
@@ -44,13 +29,6 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          for i in {1..30}; do
-            pg_isready -h localhost -p 5432 -U petclinic && break
-            echo "Waiting for postgres..."
-            sleep 2
-          done
 
-      - name: Run tests with PostgreSQL profile
-        run: mvn test -Dspring.profiles.active=postgres
+      - name: Run tests 
+        run: mvn test 

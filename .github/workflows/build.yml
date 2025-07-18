@@ -6,7 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -20,8 +21,26 @@ jobs:
           java-version: ${{matrix.java}}
           distribution: 'adopt'
           cache: maven
+
       - name: Build with Maven Wrapper
         run: ./mvnw -B verify -Dspring.docker.compose.skip.in-tests=true -Dtest=!PostgresIntegrationTests
+
       - name: Display test logs
         if: failure()
         run: cat target/surefire-reports/*.txt
+
+  docker:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t mon-app:latest .
+
+      - name: Test Docker container
+        run: |
+          docker run -d --name mon-app-test -p 8080:8080 mon-app:latest
+          sleep 10
+          curl -f http://localhost:8080 || (docker logs mon-app-test && exit 1)
